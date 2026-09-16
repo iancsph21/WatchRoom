@@ -154,8 +154,11 @@ export function createWatchRoom({demo = false, clientId = '', clientSecret = '',
       }
       if (ws.role==='host') {
         if (m.type==='frame' && typeof m.jpeg==='string' && m.jpeg.length<750000 && /^[A-Za-z0-9+/=]+$/.test(m.jpeg)) {
-          const now=Date.now(); if (now-(r.lastFrame||0)<180) return; r.lastFrame=now;
-          for (const v of r.viewers) if (v.bufferedAmount<800000) send(v,{type:'frame',jpeg:m.jpeg});
+          const now=Date.now();
+          if(now-(r.frameWindow||0)>=1000){r.frameWindow=now;r.frameCount=0;r.frameBytes=0;}
+          if((r.frameCount||0)>=35||(r.frameBytes||0)+m.jpeg.length>2500000)return;
+          r.frameCount=(r.frameCount||0)+1;r.frameBytes=(r.frameBytes||0)+m.jpeg.length;r.lastFrame=now;
+          for (const v of r.viewers) if (v.bufferedAmount<150000) send(v,{type:'frame',jpeg:m.jpeg});
         } else if (m.type==='decision' && r.pending && m.request===r.pending.id) {
           const p=r.pending; r.pending=null;
           if (m.allow===true && p.expires>Date.now() && r.viewers.has(p.ws)) {r.controller=p.ws;r.until=Date.now()+grantMs;send(ws,{type:'grant',request:p.id,until:r.until});}
