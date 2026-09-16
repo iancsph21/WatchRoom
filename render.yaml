@@ -1,0 +1,21 @@
+services:
+  - type: web
+    name: watch-talim
+    runtime: node
+    plan: free
+    buildCommand: npm ci --include=dev && npm run build
+    startCommand: npm start
+    healthCheckPath: /healthz
+    envVars:
+      - key: NODE_VERSION
+        value: 24.21.0
+      - key: HOST
+        value: 0.0.0.0
+      - key: DEMO_MODE
+        value: "false"
+      - key: DISCORD_CLIENT_ID
+        sync: false
+      - key: DISCORD_CLIENT_SECRET
+        sync: false
+      - key: PUBLIC_ORIGIN
+        sync: false
